@@ -1,19 +1,18 @@
 import os
-import train
-import conversion
+from predict import build_single_prediction
 from cfg import Config
+from flask import Flask, escape, request
 
-def download_and_prepare_data():
-    if not os.path.exists('samples'):
-        train.download_dir('')
-        train.train_data_to_wave()
+STATIC_PRED_AUDIO_DIR = 'audio'
 
-def write_data_to_csv():
-    train.write_to_csv(config.train_dir, config.train_cats)
+app = Flask(__name__)
 
-config = Config('conv')
-download_and_prepare_data()
-wait = input("Convert the data using Media Encoder and press Enter to continue...")
-print("Continuing...")
-conversion.replace_converted_audio()
-write_data_to_csv()
+@app.route('/')
+def ping():
+    pong = request.args.get('pinger', 'pong2')
+    return f'Hello {escape(pong)}!'
+
+@app.route('/inference/<filename>')
+def predict_audio_class(filename):
+    prediction = build_single_prediction(filename, STATIC_PRED_AUDIO_DIR)
+    return prediction

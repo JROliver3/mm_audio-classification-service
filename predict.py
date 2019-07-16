@@ -8,6 +8,7 @@ import pickle
 import csv
 import boto3
 from os import walk
+import shutil
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, LSTM
 from tensorflow.keras.layers import Dropout, Dense, TimeDistributed
 from tensorflow.keras.models import Sequential
@@ -67,11 +68,15 @@ def write_to_csv(current_dir, csv_name):
 
 def download_audio_file(fn):
     bucket_name = 'mm-acs-audio-storage'
-    s3_file_path= 'asc/audio' + '/' + fn + '.wav'
+    s3_file_path= 'asc_data/audio' + '/' + fn + '.wav'
     save_as = fn + '.wav'
 
     s3 = boto3.client('s3')
-    s3.download_file(bucket_name , s3_file_path, save_as)
+    s3.download_file(bucket_name, s3_file_path, save_as)
+    if not os.path.exists(os.path.join('asc_data','audio')):
+        os.makedirs(os.path.join('asc_data','audio'))
+    shutil.move(save_as, os.path.join('asc_data','audio'))
+
 
 def build_single_prediction(fn, audio_dir):
     y_true = []

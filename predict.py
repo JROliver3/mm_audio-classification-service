@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import csv
+import boto3
 from os import walk
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Flatten, LSTM
 from tensorflow.keras.layers import Dropout, Dense, TimeDistributed
@@ -64,15 +65,25 @@ def write_to_csv(current_dir, csv_name):
                 filewriter.writerow({'fname':filename})
     print("successfully created predict audio csv")
 
+def download_audio_file(fn):
+    bucket_name = 'mm-acs-audio-storage'
+    s3_file_path= 'asc/audio' + '/' + fn + '.wav'
+    save_as = fn + '.wav'
+
+    s3 = boto3.client('s3')
+    s3.download_file(bucket_name , s3_file_path, save_as)
+
 def build_single_prediction(fn, audio_dir):
     y_true = []
     y_pred = []
     fn_prob = {}
+    config = Config('conv')
+    download_audio_file(fn)
     model = load_model(config.model_path)
     print("Extracting Features from Audio" )
     
     try:
-        rate, wav = wavfile.read(os.path.join(audio_dir, fn))
+        rate, wav = wavfile.read(os.path.join(audio_dir, fn+'.wav'))
         y_prob = []
         config.step = int(rate/10)
 

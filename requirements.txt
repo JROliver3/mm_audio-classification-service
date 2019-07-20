@@ -1,5 +1,5 @@
 
-boto==2.49.0
+boto3==1.9.189
 entrypoints==0.3
 Flask==1.0.2
 Jinja2==2.10
